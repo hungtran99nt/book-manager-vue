@@ -1,10 +1,17 @@
+import type { Dayjs } from 'dayjs';
+
 type IUserType = 'Admin';
 
 export interface User {
   username: string;
   firstName: string;
   lastName: string;
-  type: IUserType;
+  type?: IUserType;
   gender?: string;
-  dob?: Date;
+  dob?: Dayjs;
+}
+
+export interface IRegisterUser extends User {
+  password: string;
+  confirmPassword: string;
 }
