@@ -1,6 +1,9 @@
 @import './base.css';
+@tailwind components;
+@tailwind utilities;
 
 #app {
   width: 100%;
   height: 100%;
 }
+
