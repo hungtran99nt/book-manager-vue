@@ -30,6 +30,7 @@
   import type { IBook } from '@/api/book';
   import dayjs from 'dayjs';
   import { handleError } from '@/hooks/common/useForm';
+  import type { IFile } from '@/api/common';
 
   defineEmits([]);
 
@@ -51,8 +52,12 @@
     try {
       loading.value = true;
       const form = await unref(formBookRef).validate();
-      console.log(form);
-      const { data } = await HTTPS.put<IBook>('/books/edit', { ...form, id: params.id });
+      const file = await handleUploadFile();
+      const { data } = await HTTPS.put<IBook>('/books/edit', {
+        ...form,
+        id: params.id,
+        imagePath: file?.fileName,
+      });
       console.log(data, 'data');
       message.success('Edit successful!');
       goListBook();
@@ -61,6 +66,15 @@
     } finally {
       loading.value = false;
     }
+  };
+
+  const handleUploadFile = async (): Promise<IFile | null> => {
+    const fileData = unref(formBookRef).getFileData();
+    if (fileData) {
+      const { data } = await HTTPS.post<IFile>('/file/upload', fileData);
+      return data;
+    }
+    return null;
   };
 
   onMounted(async () => {
