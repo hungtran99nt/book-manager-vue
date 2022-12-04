@@ -15,9 +15,12 @@
 <script lang="ts" setup>
   import { ref, unref } from 'vue';
   import { Button, message, PageHeader, Space } from 'ant-design-vue';
+
   import { useRedirectBook } from '@/hooks/common/useRedirectBook';
   import { HTTPS } from '@/utils/http/Axios';
   import { handleError } from '@/hooks/common/useForm';
+  import type { IFile } from '@/api/common';
+  import type { IBook } from '@/api/book';
 
   import PageFooter from '../components/PageFooter.vue';
   import BookForm from './BookForm.vue';
@@ -34,7 +37,11 @@
       loading.value = true;
       const form = await unref(formBookRef).validate();
       console.log(form);
-      const { data } = await HTTPS.post('/books/create', form);
+      const file = await handleUploadFile();
+      const { data } = await HTTPS.post<IBook>('/books/create', {
+        ...form,
+        imagePath: file?.fileName,
+      });
       console.log(data, 'data');
       message.success('Create successful!');
       goListBook();
@@ -45,5 +52,12 @@
     }
   };
 
-  defineExpose({});
+  const handleUploadFile = async (): Promise<IFile | null> => {
+    const fileData = unref(formBookRef).getFileData();
+    if (fileData) {
+      const { data } = await HTTPS.post<IFile>('/file/upload', fileData);
+      return data;
+    }
+    return null;
+  };
 </script>

@@ -9,3 +9,10 @@ export interface IPaging {
   totalElements: number;
   totalPages: number;
 }
+
+export interface IFile {
+  fileName: string;
+  fileDownloadUri: string;
+  fileType: string;
+  size: number;
+}

@@ -23,15 +23,14 @@ export const useForm = <T>(
     unref(formRef).resetFields();
   };
 
-  const handleChangeImage = (e: any) => {
-    console.log(e);
+  const handleChangeImage = async (e: any) => {
     const fileData = e.target.files[0];
     fileDataRef.value = fileData;
-    const theReader = new FileReader();
-    theReader.onloadend = () => {
-      fileRef.value = theReader.result;
+    const fileReader = new FileReader();
+    fileReader.onloadend = () => {
+      fileRef.value = fileReader.result;
     };
-    theReader.readAsDataURL(fileData);
+    fileReader.readAsDataURL(fileData);
   };
 
   return { validate, setFieldValue, resetFields, handleChangeImage };

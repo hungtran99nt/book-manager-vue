@@ -70,6 +70,7 @@
       loading.value = true;
       const { data } = await HTTPS.get<IBook>(`/books/${params.id}/detail`);
       console.log(data, 'data');
+      if (data.imagePath) unref(formBookRef).handleDownloadFile(data.imagePath);
       unref(formBookRef).setFieldValue({ ...data, publishOn: dayjs(data.publishOn) });
     } catch (error) {
       handleError(error);

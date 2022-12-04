@@ -8,16 +8,19 @@
     UserAddOutlined,
     ExclamationCircleOutlined,
   } from '@ant-design/icons-vue';
+  import type { MenuInfo } from 'ant-design-vue/lib/menu/src/interface';
+
   import ModalLogin from './views/sys/ModalLogin.vue';
   import { computed, createVNode, ref } from 'vue';
-  import type { MenuInfo } from 'ant-design-vue/lib/menu/src/interface';
   import { useUserStore } from './stores/user';
   import { LOGIN_STATE } from './const/const';
   import type { ILoginState } from './const/type';
+  import { useRedirectBook } from './hooks/common/useRedirectBook';
 
   const modalRef = ref();
 
   const userStore = useUserStore();
+  const { goListBook } = useRedirectBook();
 
   const buttonTitle = computed<string>(() => {
     if (userStore.isAuthorized)
@@ -43,6 +46,7 @@
       content: 'We are gonna miss u 🥺',
       onOk() {
         userStore.logout();
+        goListBook();
       },
       okText: 'See ya!',
       cancelText: 'if you insist',
