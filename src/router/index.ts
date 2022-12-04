@@ -7,18 +7,36 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: BookList,
+      redirect: { path: '/book' },
       meta: {
         title: '',
       },
-    },
-    {
-      path: '/create',
-      name: 'create',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/books/BookAdd.vue'),
+      children: [
+        {
+          path: 'book',
+          component: BookList,
+          meta: {
+            title: 'Book',
+          },
+          children: [],
+        },
+        {
+          path: 'book/create',
+          name: 'create',
+          // route level code-splitting
+          // this generates a separate chunk (About.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import('../views/books/BookAdd.vue'),
+        },
+        {
+          path: 'book/:id',
+          name: 'view',
+          // route level code-splitting
+          // this generates a separate chunk (About.[hash].js) for this route
+          // which is lazy-loaded when the route is visited.
+          component: () => import('../views/books/BookView.vue'),
+        },
+      ],
     },
   ],
 });

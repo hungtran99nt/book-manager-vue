@@ -12,19 +12,27 @@
     <template #title>
       <Row justify="space-between">
         <Col>
-          <span>Title</span>
+          <span>This is a wholesome title</span>
         </Col>
         <Col>
-          <Button @click="goCreateBook">Add</Button>
+          <Button type="primary" @click="goCreateBook" :icon="createVNode(PlusCircleOutlined)">
+            Add book
+          </Button>
         </Col>
       </Row>
     </template>
-    <template #bodyCell="{ column }">
+    <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'action'">
         <span>
           <Space>
-            <Button>View</Button>
-            <Button>Edit</Button>
+            <Button
+              @click="() => handleView(record)"
+              type="link"
+              style="color: chartreuse"
+              :icon="createVNode(EyeOutlined)"
+            />
+            <Button type="link" style="color: cornflowerblue" :icon="createVNode(EditOutlined)" />
+            <Button type="link" style="color: crimson" :icon="createVNode(DeleteOutlined)" />
           </Space>
         </span>
       </template>
@@ -32,7 +40,7 @@
   </Table>
 </template>
 <script lang="ts" setup>
-  import { computed } from 'vue';
+  import { computed, createVNode } from 'vue';
   import { usePagination } from 'vue-request';
   import {
     Button,
@@ -44,6 +52,13 @@
     type TableProps,
   } from 'ant-design-vue';
 
+  import {
+    EyeOutlined,
+    EditOutlined,
+    PlusCircleOutlined,
+    DeleteOutlined,
+  } from '@ant-design/icons-vue';
+
   import { HTTP } from '@/utils/http/Axios';
   import type { IBook } from '@/api/book';
   import type { IPaging } from '@/api/common';
@@ -52,7 +67,7 @@
 
   import { columns } from './data';
 
-  const { goCreateBook } = useRedirectBook();
+  const { goCreateBook, goViewBook } = useRedirectBook();
 
   interface IRes extends IPaging {
     content: IBook[];
@@ -100,5 +115,10 @@
       page: current,
       pageSize: pageSize,
     });
+  };
+
+  const handleView = (record: IBook) => {
+    console.log('👀 ====> handleView ====> record', record);
+    goViewBook(record.id);
   };
 </script>

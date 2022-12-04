@@ -16,6 +16,7 @@
     "ant-design-vue": "^3.2.15",
     "axios": "^0.26.1",
     "dayjs": "^1.11.1",
+    "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "pinia": "^2.0.23",
     "qs": "^6.10.3",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
+    "@types/lodash": "^4.14.191",
     "@types/node": "^16.11.68",
     "@vitejs/plugin-vue": "^3.1.2",
     "@vitejs/plugin-vue-jsx": "^2.0.1",

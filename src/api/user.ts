@@ -1,6 +1,5 @@
+import type { IUserType } from '@/const/type';
 import type { Dayjs } from 'dayjs';
-
-type IUserType = 'Admin';
 
 export interface User {
   username: string;
@@ -9,9 +8,4 @@ export interface User {
   type?: IUserType;
   gender?: string;
   dob?: Dayjs;
-}
-
-export interface IRegisterUser extends User {
-  password: string;
-  confirmPassword: string;
 }

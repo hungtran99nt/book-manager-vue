@@ -1,5 +1,5 @@
 <template>
-  <Form class="p-4" ref="formRef" :model="formModel" :rules="formRules" :layout="'vertical'">
+  <Form class="p-2" ref="formRef" :model="formModel" :rules="formRules" :layout="'vertical'">
     <Row :gutter="24">
       <Col :span="12">
         <Form.Item name="firstName" required label="First name">
@@ -7,6 +7,7 @@
             v-model:value="formModel.firstName"
             size="large"
             :placeholder="'Enter first name'"
+            class="fix-auto-fill"
           />
         </Form.Item>
       </Col>
@@ -84,11 +85,17 @@
   import type { Rule } from 'ant-design-vue/lib/form';
 
   import { genderOptions } from '@/const/options';
-  import type { IRegisterUser } from '@/api/user';
-  import { createRule, validateConfirmPassword, useFormValid } from './useForm';
+  import type { IRegisterUser } from '@/api/auth';
+  import {
+    createRule,
+    validateConfirmPassword,
+    useFormValid,
+    validatePassword,
+  } from '../../hooks/common/useForm';
   import { HTTP } from '@/utils/http/Axios';
+  import { cloneDeep } from 'lodash';
 
-  const emit = defineEmits(['success']);
+  const emit = defineEmits(['register-success']);
 
   const formModel: IRegisterUser = reactive({
     username: '',
@@ -103,7 +110,10 @@
 
   const formRules = computed<{ [K in keyof IRegisterUser]: Rule | Rule[] }>(() => ({
     username: createRule('Username is required'),
-    password: createRule('Password is required'),
+    password: [
+      ...createRule('Password is required'),
+      { validator: validatePassword(formRef, formModel.confirmPassword), trigger: 'change' },
+    ],
     firstName: createRule('First name is required'),
     lastName: createRule('Last name is required'),
     confirmPassword: [
@@ -111,17 +121,16 @@
     ],
   }));
 
-  const { validForm } = useFormValid(formRef);
+  const { validForm } = useFormValid<IRegisterUser>(formRef);
 
   const handleRegister = async () => {
     try {
       loading.value = true;
       const form = await validForm();
       if (!form) return;
-      console.log(form);
       await HTTP.post('/signup', form);
       message.success('Registration success, please login to enjoy!');
-      emit('success', form);
+      emit('register-success', cloneDeep(form));
     } catch (error) {
       // eslint-disable-next-line
       message.error((error as unknown as any).response.data.message);

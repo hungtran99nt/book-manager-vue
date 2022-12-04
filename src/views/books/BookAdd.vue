@@ -1,22 +1,49 @@
 <template>
-  <div>Book add</div>
-  <div class="flex w-full h-full py-5 xl:h-auto xl:py-0 xl:my-0 xl:w-6/12">
-    <div
-      :class="`login-form`"
-      class="relative w-full px-5 py-8 mx-auto my-auto rounded-md shadow-md xl:ml-16 xl:bg-transparent sm:px-8 xl:p-4 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto enter-x"
-    >
-      <LoginForm />
-      <ForgetPasswordForm />
-      <RegisterForm />
-    </div>
-  </div>
+  <PageHeader :title="'Create a new book'" />
+
+  <BookForm ref="formBookRef" />
+
+  <PageFooter>
+    <template #right>
+      <Space>
+        <Button type="primary" block @click="handleSubmit" :loading="loading">SAVE</Button>
+        <Button block @click="goListBook">BAKC TO LIST</Button>
+      </Space>
+    </template>
+  </PageFooter>
 </template>
 <script lang="ts" setup>
-  import LoginForm from '../sys/LoginForm.vue';
+  import { Button, message, PageHeader, Space } from 'ant-design-vue';
 
-  defineProps({});
+  import BookForm from './BookForm.vue';
+  import PageFooter from '../components/PageFooter.vue';
+  import { ref, unref } from 'vue';
+  import { useRedirectBook } from '@/hooks/common/useRedirectBook';
+  import { HTTPS } from '@/utils/http/Axios';
 
   defineEmits([]);
+
+  const formBookRef = ref();
+  const loading = ref<boolean>(false);
+
+  const { goListBook } = useRedirectBook();
+
+  const handleSubmit = async () => {
+    try {
+      loading.value = true;
+      const form = await unref(formBookRef).validate();
+      console.log(form);
+      const { data } = await HTTPS.post('/books/create', form);
+      console.log(data, 'data');
+      message.success('Create successful!');
+      goListBook();
+    } catch (error) {
+      // eslint-disable-next-line
+      message.error((error as unknown as any).response.data?.message || (error as unknown as any).response.data?.error);
+    } finally {
+      loading.value = false;
+    }
+  };
 
   defineExpose({});
 </script>

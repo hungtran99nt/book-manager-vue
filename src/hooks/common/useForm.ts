@@ -23,6 +23,15 @@ export const validateConfirmPassword = (password: string) => {
   };
 };
 
+export const validatePassword = (formRef: VNodeRef, confirmPassword: string) => {
+  return async (_: RuleObject) => {
+    if (confirmPassword !== '') {
+      unref(formRef).validateFields('confirmPassword');
+    }
+    return Promise.resolve();
+  };
+};
+
 export function useFormValid<T extends Object>(formRef: VNodeRef) {
   async function validForm() {
     const form = unref(formRef);

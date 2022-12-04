@@ -1,6 +1,5 @@
-import { processExpression } from '@vue/compiler-core';
+import { useUserStore } from '@/stores/user';
 import axios from 'axios';
-import { Persistent, TOKEN_KEY } from '../cache/persistent';
 
 export const HTTP = axios.create({
   baseURL: 'http://localhost:8080',
@@ -8,7 +7,18 @@ export const HTTP = axios.create({
 
 export const HTTPS = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
-  headers: {
-    Authorization: `Bearer ${Persistent.getLocal(TOKEN_KEY)}`,
-  },
 });
+
+HTTPS.interceptors.request.use(
+  (config) => {
+    if (config.headers) {
+      const userStore = useUserStore();
+      const token = userStore.getToken;
+      config.headers['Authorization'] = 'Bearer ' + token;
+    }
+    return config;
+  },
+  (error) => {
+    Promise.reject(error);
+  },
+);

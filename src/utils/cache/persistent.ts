@@ -14,7 +14,8 @@ export class Persistent {
   static getLocal<T>(key: LocalKeys) {
     const val = localStorage.getItem(key);
     if (!val) return null;
-    return JSON.parse(val) as T | null;
+    // TODO - ? save key cc
+    return JSON.parse(val).value as T | null;
   }
 
   static setLocal(key: LocalKeys, value: Store[LocalKeys]): void {

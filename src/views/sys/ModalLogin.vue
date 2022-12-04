@@ -6,30 +6,53 @@
     centered
     :cancel-button-props="{ hidden: 'hidden' }"
     :ok-button-props="{ hidden: 'hidden' }"
+    destroy-on-close
   >
-    <Tabs v-model:active-key="activeTab">
-      <TabPane key="1" tab="Login">
-        <LoginForm @go-register="setActiveTab('2')" />
+    <Tabs v-model:active-key="currentState">
+      <TabPane :key="LOGIN_STATE.LOGIN" tab="Login">
+        <LoginForm
+          ref="formLoginRef"
+          @go-register="setActiveTab(LOGIN_STATE.REGISTER)"
+          @login-success="handleLoginSuccess"
+        />
       </TabPane>
-      <TabPane key="2" tab="Register"> <RegisterForm /></TabPane>
+      <TabPane :key="LOGIN_STATE.REGISTER" tab="Register">
+        <RegisterForm @register-success="handleRegisterSuccess" />
+      </TabPane>
     </Tabs>
   </Modal>
 </template>
 <script lang="ts" setup>
+  import type { IRegisterUser } from '@/api/auth';
+  import { LOGIN_STATE } from '@/const/const';
+  import type { ILoginState } from '@/const/type';
   import { Modal, TabPane, Tabs } from 'ant-design-vue';
   import { ref } from 'vue';
 
   import LoginForm from './LoginForm.vue';
   import RegisterForm from './RegisterForm.vue';
 
+  const formLoginRef = ref();
   const visible = ref<boolean>(false);
-  const activeTab = ref<string>('1');
+  const currentState = ref<ILoginState>(LOGIN_STATE.LOGIN);
 
-  const setVisible = (isVisible = false) => {
+  const setVisible = (isVisible: boolean, state = LOGIN_STATE.LOGIN) => {
     visible.value = isVisible;
+    setActiveTab(state);
   };
-  const setActiveTab = (tab: string) => {
-    activeTab.value = tab;
+  const setActiveTab = (state: ILoginState) => {
+    currentState.value = state;
+  };
+
+  const handleLoginSuccess = () => {
+    setVisible(false);
+  };
+
+  const handleRegisterSuccess = (data?: IRegisterUser) => {
+    setActiveTab(LOGIN_STATE.LOGIN);
+    console.log(data, 'handleRegisterSuccess');
+
+    formLoginRef.value.setFormLogin(data);
   };
 
   defineExpose({ setVisible });

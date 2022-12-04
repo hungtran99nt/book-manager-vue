@@ -1,9 +1,13 @@
+import type { Dayjs } from 'dayjs';
+
 export interface IBook {
-  id: number;
   title: string;
   author: string;
-  publishOn: Date;
-  totalPage: number;
+  publishOn: Dayjs;
+  totalPage?: number;
+  id?: number;
+  description?: string;
   category?: string;
   imagePath?: string;
+  image?: Blob;
 }

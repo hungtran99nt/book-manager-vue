@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
+import { message } from 'ant-design-vue';
 
 import { HTTP, HTTPS } from '@/utils/http/Axios';
 import { Persistent, TOKEN_KEY, USER_INFO_KEY } from '@/utils/cache/persistent';
-
 import type { User } from '@/api/user';
-import type { LoginParams } from '@/api/auth';
+import type { ILogin, ILoginResponse } from '@/api/auth';
+import { USER_TYPE } from '@/const/const';
 
 interface UserState {
   userInfo: User | null;
@@ -24,6 +25,12 @@ export const useUserStore = defineStore({
     getToken(): string {
       return this.token || (Persistent.getLocal<string>(TOKEN_KEY) as string);
     },
+    isAuthorized(): boolean {
+      if (this.getToken && this.getUserInfo && this.getUserInfo.type === USER_TYPE.Admin) {
+        return true;
+      }
+      return false;
+    },
   },
   actions: {
     setUserInfo(info: User | null) {
@@ -32,25 +39,29 @@ export const useUserStore = defineStore({
     },
     setToken(token: string | undefined) {
       this.token = token || '';
+      Persistent.setLocal(TOKEN_KEY, token);
+      // axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     },
     resetState() {
       this.userInfo = null;
       this.token = '';
     },
-    async login(params: LoginParams): Promise<User | null> {
+    async login(requestData: ILogin): Promise<User | null> {
       try {
-        const { data } = await HTTP.get('/signin', { params: params });
+        const { data } = await HTTP.post<ILoginResponse>('/signin', requestData);
         const { token, username } = data;
 
         this.setToken(token);
 
         if (!this.getToken) return null;
 
-        const { data: userInfo } = await HTTPS.get(`/users/${username}`);
+        const { data: userInfo } = await HTTPS.get<User>(`/users/${username}/detail`);
+        this.setUserInfo(userInfo);
 
         return userInfo;
       } catch (error) {
-        return Promise.reject(error);
+        // eslint-disable-next-line
+        return Promise.reject(message.error((error as unknown as any).response.data.error));
       }
     },
     logout() {
@@ -60,3 +71,8 @@ export const useUserStore = defineStore({
     },
   },
 });
+
+// Need to be used outside the setup
+// export function useUserStoreWithOut() {
+//   return useUserStore(store);
+// }
