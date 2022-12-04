@@ -7,19 +7,20 @@
     <template #right>
       <Space>
         <Button type="primary" block @click="handleSubmit" :loading="loading">SAVE</Button>
-        <Button block @click="goListBook">BAKC TO LIST</Button>
+        <Button block @click="goListBook">BACK TO LIST</Button>
       </Space>
     </template>
   </PageFooter>
 </template>
 <script lang="ts" setup>
-  import { Button, message, PageHeader, Space } from 'ant-design-vue';
-
-  import BookForm from './BookForm.vue';
-  import PageFooter from '../components/PageFooter.vue';
   import { ref, unref } from 'vue';
+  import { Button, message, PageHeader, Space } from 'ant-design-vue';
   import { useRedirectBook } from '@/hooks/common/useRedirectBook';
   import { HTTPS } from '@/utils/http/Axios';
+  import { handleError } from '@/hooks/common/useForm';
+
+  import PageFooter from '../components/PageFooter.vue';
+  import BookForm from './BookForm.vue';
 
   defineEmits([]);
 
@@ -38,8 +39,7 @@
       message.success('Create successful!');
       goListBook();
     } catch (error) {
-      // eslint-disable-next-line
-      message.error((error as unknown as any).response.data?.message || (error as unknown as any).response.data?.error);
+      handleError(error);
     } finally {
       loading.value = false;
     }

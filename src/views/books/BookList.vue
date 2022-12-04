@@ -15,7 +15,12 @@
           <span>This is a wholesome title</span>
         </Col>
         <Col>
-          <Button type="primary" @click="goCreateBook" :icon="createVNode(PlusCircleOutlined)">
+          <Button
+            v-if="userStore.isAuthorized"
+            type="primary"
+            @click="goCreateBook"
+            :icon="createVNode(PlusCircleOutlined)"
+          >
             Add book
           </Button>
         </Col>
@@ -26,13 +31,22 @@
         <span>
           <Space>
             <Button
+              v-if="userStore.isAuthorized"
               @click="() => handleView(record)"
               type="link"
               style="color: chartreuse"
               :icon="createVNode(EyeOutlined)"
             />
-            <Button type="link" style="color: cornflowerblue" :icon="createVNode(EditOutlined)" />
-            <Button type="link" style="color: crimson" :icon="createVNode(DeleteOutlined)" />
+            <Popconfirm
+              v-if="userStore.isAuthorized"
+              placement="topRight"
+              :on-confirm="() => handleDelete(record)"
+            >
+              <template #title>
+                <p>Confirm delete</p>
+              </template>
+              <Button type="link" style="color: crimson" :icon="createVNode(DeleteOutlined)" />
+            </Popconfirm>
           </Space>
         </span>
       </template>
@@ -50,28 +64,28 @@
     Col,
     type PaginationProps,
     type TableProps,
+    message,
+    Popconfirm,
   } from 'ant-design-vue';
 
-  import {
-    EyeOutlined,
-    EditOutlined,
-    PlusCircleOutlined,
-    DeleteOutlined,
-  } from '@ant-design/icons-vue';
+  import { EyeOutlined, PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 
-  import { HTTP } from '@/utils/http/Axios';
+  import { HTTP, HTTPS } from '@/utils/http/Axios';
   import type { IBook } from '@/api/book';
   import type { IPaging } from '@/api/common';
   import type { ISearchListParams } from '@/api/common';
   import { useRedirectBook } from '@/hooks/common/useRedirectBook';
 
   import { columns } from './data';
-
-  const { goCreateBook, goViewBook } = useRedirectBook();
+  import { handleError } from '@/hooks/common/useForm';
+  import { useUserStore } from '@/stores/user';
 
   interface IRes extends IPaging {
     content: IBook[];
   }
+
+  const { goCreateBook, goViewBook } = useRedirectBook();
+  const userStore = useUserStore();
 
   const handleGetList = ({ page, pageSize }: ISearchListParams) => {
     return HTTP.get<IRes>('/api/v1/books', {
@@ -88,6 +102,7 @@
     loading,
     total,
     current,
+    reload,
     pageSize,
   } = usePagination(handleGetList, {
     formatResult: (res) => res.data,
@@ -118,7 +133,19 @@
   };
 
   const handleView = (record: IBook) => {
-    console.log('👀 ====> handleView ====> record', record);
     goViewBook(record.id);
+  };
+
+  const handleDelete = async (record: IBook) => {
+    try {
+      loading.value = true;
+      await HTTPS.delete(`/books/${record.id}/delete`);
+      reload();
+      message.success('Delete successful!');
+    } catch (error) {
+      handleError(error);
+    } finally {
+      loading.value = false;
+    }
   };
 </script>

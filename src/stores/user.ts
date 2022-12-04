@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
-import { message } from 'ant-design-vue';
 
 import { HTTP, HTTPS } from '@/utils/http/Axios';
 import { Persistent, TOKEN_KEY, USER_INFO_KEY } from '@/utils/cache/persistent';
 import type { User } from '@/api/user';
 import type { ILogin, ILoginResponse } from '@/api/auth';
 import { USER_TYPE } from '@/const/const';
+import { handleError } from '@/hooks/common/useForm';
 
 interface UserState {
   userInfo: User | null;
@@ -61,7 +61,7 @@ export const useUserStore = defineStore({
         return userInfo;
       } catch (error) {
         // eslint-disable-next-line
-        return Promise.reject(message.error((error as unknown as any).response.data.error));
+        return Promise.reject(handleError(error));
       }
     },
     logout() {

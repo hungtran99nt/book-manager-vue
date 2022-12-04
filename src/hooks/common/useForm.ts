@@ -1,3 +1,4 @@
+import { message } from 'ant-design-vue';
 import type { Rule, RuleObject } from 'ant-design-vue/lib/form';
 import { unref, type VNodeRef } from 'vue';
 
@@ -42,3 +43,10 @@ export function useFormValid<T extends Object>(formRef: VNodeRef) {
 
   return { validForm };
 }
+
+export const handleError = (error: any) => {
+  message.error(
+    (error as unknown as any).response.data?.message ||
+      (error as unknown as any).response.data?.error,
+  );
+};

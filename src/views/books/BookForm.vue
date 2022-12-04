@@ -15,30 +15,41 @@
           <Row :gutter="24">
             <Col :span="12">
               <Form.Item name="title" label="Title">
-                <Input v-model:value="formModel.title" size="large" :placeholder="'Enter title'" />
+                <Input
+                  :disabled="isViewMode"
+                  v-model:value="formModel.title"
+                  size="large"
+                  :placeholder="'Enter title'"
+                  :maxlength="100"
+                />
               </Form.Item>
             </Col>
             <Col :span="12">
               <Form.Item name="author" label="Author">
                 <Input
+                  :disabled="isViewMode"
                   v-model:value="formModel.author"
                   size="large"
                   :placeholder="'Enter author'"
+                  :maxlength="50"
                 />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item name="description" label="Description">
             <Input.TextArea
+              :disabled="isViewMode"
               v-model:value="formModel.description"
               size="large"
               :placeholder="'Enter description'"
+              :maxlength="500"
             />
           </Form.Item>
           <Row :gutter="24">
             <Col :span="12">
               <Form.Item name="publishOn" label="Published date">
                 <DatePicker
+                  :disabled="isViewMode"
                   class="w-full"
                   v-model:value="formModel.publishOn"
                   :placeholder="'Pick published date'"
@@ -49,16 +60,20 @@
             <Col :span="12">
               <Form.Item name="totalPage" label="Total pages">
                 <InputNumber
+                  :disabled="isViewMode"
                   class="w-full"
                   v-model:value="formModel.totalPage"
                   size="large"
                   :placeholder="'Enter total pages'"
+                  :max="10000"
+                  :min="0"
                 />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item name="category" label="Category">
             <Select
+              :disabled="isViewMode"
               v-model:value="formModel.category"
               :options="categoryOptions"
               :placeholder="'Choose gender'"
@@ -68,10 +83,19 @@
       </Col>
       <Col :span="12" style="width: 300px">
         <Card>
+          <Button :disabled="isViewMode" @click="uploadImage">Upload</Button>
           <template #title>
             <span style="font-weight: bold">Cover image</span>
           </template>
-          <Input type="file" size="large" @change="handleChangeImage" class="mb-2" />
+          <Upload :file-list="fileListRef" />
+          <Input
+            ref="fileRef"
+            :disabled="isViewMode"
+            type="file"
+            size="large"
+            class="mb-2"
+            @change="handleChangeImage"
+          />
           <Image
             :src="
               fileSrc ||
@@ -81,7 +105,6 @@
             preview
           />
         </Card>
-        <Button @click="uploadImage">hahahahah</Button>
       </Col>
     </Row>
   </Form>
@@ -89,6 +112,7 @@
 <script lang="ts" setup>
   import type { IBook } from '@/api/book';
   import { categoryOptions } from '@/const/options';
+  import { FormMode } from '@/const/type';
   import { HTTPS } from '@/utils/http/Axios';
   import {
     Button,
@@ -101,28 +125,42 @@
     InputNumber,
     Row,
     Select,
+    Upload,
   } from 'ant-design-vue';
-  import { reactive, ref } from 'vue';
+  import { computed, reactive, ref, type PropType } from 'vue';
   import { formRules } from './helper';
   import { useForm } from './useForm';
 
-  //   defineProps({});
+  const props = defineProps({
+    mode: {
+      type: Number as PropType<FormMode>,
+      default: FormMode.CREATE,
+    },
+  });
 
   defineEmits([]);
 
   const formModel = reactive<Record<string, any>>({});
   const formRef = ref();
+  const fileListRef = ref();
+
+  const fileRef = ref();
+  const fileData = ref(); // ?
   const fileSrc = ref();
+  const isViewMode = computed(() => props.mode === FormMode.VIEW);
 
   const { validate, setFieldValue, handleChangeImage } = useForm<IBook>(
     formRef,
     formModel,
     fileSrc,
+    fileData,
   );
 
   const uploadImage = async () => {
-    const { data } = await HTTPS.post('/file/upload', { file: fileSrc.value });
-    console.log(data);
+    console.log('fileRef.value', fileRef.value);
+
+    // const { data } = await HTTPS.post('/file/upload', { file: fileRef.value });
+    // console.log(data, 'data');
   };
 
   defineExpose({ validate, setFieldValue });

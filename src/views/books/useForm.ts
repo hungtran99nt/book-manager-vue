@@ -1,7 +1,12 @@
 import type { FormExpose } from 'ant-design-vue/lib/form/Form';
 import { unref, type Ref } from 'vue';
 
-export const useForm = <T>(formRef: Ref<FormExpose>, formModel: Record<string, any>, file: Ref) => {
+export const useForm = <T>(
+  formRef: Ref<FormExpose>,
+  formModel: Record<string, any>,
+  fileRef: Ref,
+  fileDataRef: Ref,
+) => {
   const validate = async () => {
     console.log('validate');
     const form = unref(formRef);
@@ -21,9 +26,10 @@ export const useForm = <T>(formRef: Ref<FormExpose>, formModel: Record<string, a
   const handleChangeImage = (e: any) => {
     console.log(e);
     const fileData = e.target.files[0];
+    fileDataRef.value = fileData;
     const theReader = new FileReader();
     theReader.onloadend = () => {
-      file.value = theReader.result;
+      fileRef.value = theReader.result;
     };
     theReader.readAsDataURL(fileData);
   };

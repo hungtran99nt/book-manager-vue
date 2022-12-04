@@ -91,6 +91,7 @@
     validateConfirmPassword,
     useFormValid,
     validatePassword,
+    handleError,
   } from '../../hooks/common/useForm';
   import { HTTP } from '@/utils/http/Axios';
   import { cloneDeep } from 'lodash';
@@ -132,8 +133,7 @@
       message.success('Registration success, please login to enjoy!');
       emit('register-success', cloneDeep(form));
     } catch (error) {
-      // eslint-disable-next-line
-      message.error((error as unknown as any).response.data.message);
+      handleError(error);
     } finally {
       loading.value = false;
     }
